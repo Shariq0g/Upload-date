@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Before the Last Archive — Upload Checklist</title>
 
 <style>
@@ -12,75 +13,138 @@
 
     body {
         margin: 0;
-        padding: 30px 15px;
-        background: #f4f4f4;
+        padding: 20px;
+        background: #f2f2f2;
         font-family: Arial, sans-serif;
         color: #111;
     }
 
     .container {
-        max-width: 650px;
+        max-width: 700px;
         margin: auto;
         background: white;
         padding: 25px;
-        border-radius: 14px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border-radius: 16px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.08);
     }
 
     h1 {
-        margin-top: 0;
-        font-size: 24px;
+        margin: 0 0 8px;
+        font-size: 25px;
+    }
+
+    .subtitle {
+        color: #666;
+        margin-bottom: 20px;
     }
 
     .info {
-        background: #f0f0f0;
-        padding: 12px;
-        border-radius: 8px;
+        background: #f5f5f5;
+        border-radius: 10px;
+        padding: 15px;
         margin-bottom: 20px;
-        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .section-title {
+        margin-top: 25px;
+        margin-bottom: 8px;
+        font-size: 18px;
+        font-weight: bold;
     }
 
     .day {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 14px 10px;
-        border-bottom: 1px solid #ddd;
+        padding: 14px 8px;
+        border-bottom: 1px solid #e5e5e5;
     }
 
     .day input {
-        width: 20px;
-        height: 20px;
+        width: 21px;
+        height: 21px;
         cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .day-info {
+        flex: 1;
     }
 
     .date {
         font-weight: bold;
+        font-size: 16px;
     }
 
     .chapter {
-        margin-left: auto;
-        color: #555;
+        margin-top: 4px;
         font-size: 14px;
+        color: #666;
+    }
+
+    .release {
+        font-size: 13px;
+        color: #888;
+        margin-top: 3px;
     }
 
     .rest {
+        color: #999;
         background: #fafafa;
+    }
+
+    .rest .date {
         color: #999;
     }
 
-    .reset {
-        margin-top: 20px;
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
+    .done .date,
+    .done .chapter {
+        text-decoration: line-through;
+        opacity: 0.55;
+    }
+
+    .progress-box {
+        margin: 20px 0;
+        padding: 15px;
         background: #111;
         color: white;
+        border-radius: 10px;
+    }
+
+    .progress-text {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #444;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .progress {
+        height: 100%;
+        width: 0%;
+        background: white;
+        transition: width 0.2s;
+    }
+
+    button {
+        width: 100%;
+        padding: 13px;
+        margin-top: 20px;
+        border: none;
+        border-radius: 9px;
+        background: #111;
+        color: white;
+        font-size: 15px;
         cursor: pointer;
     }
 
-    .reset:hover {
+    button:hover {
         background: #333;
     }
 </style>
@@ -92,14 +156,30 @@
 
     <h1>Before the Last Archive</h1>
 
+    <div class="subtitle">
+        Royal Road Upload Checklist
+    </div>
+
     <div class="info">
-        Upload schedule: <b>5 days ON + 2 days OFF</b><br>
-        Release time: <b>3:14 PM IST</b>
+        <b>First batch:</b> Sunday, 27 September 2026 — 5 Chapters<br>
+        <b>Regular schedule:</b> Monday–Friday — 1 Chapter/day<br>
+        <b>Rest:</b> Saturday & Sunday<br>
+        <b>Release time:</b> 3:14 PM IST
+    </div>
+
+    <div class="progress-box">
+        <div class="progress-text" id="progressText">
+            0 completed
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
     </div>
 
     <div id="schedule"></div>
 
-    <button class="reset" onclick="resetChecklist()">
+    <button onclick="resetChecklist()">
         Reset Checklist
     </button>
 
@@ -107,82 +187,246 @@
 
 <script>
 
-const startDate = new Date("2026-09-25T00:00:00");
+const startDate = new Date(2026, 8, 27); // 27 September 2026
 
-const schedule = [];
+const totalDays = 120;
+
 let chapter = 1;
+let schedule = [];
 
-for (let i = 0; i < 70; i++) {
+for (let i = 0; i < totalDays; i++) {
 
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + i);
 
-    const dayOfCycle = i % 7;
+    const day = date.getDay();
 
-    const uploadDay = dayOfCycle < 5;
+    /*
+        27 September 2026 = Sunday
+        First Sunday = 5 chapters
+        After that:
+        Monday-Friday = 1 chapter
+        Saturday-Sunday = Rest
+    */
 
-    schedule.push({
-        date: date,
-        upload: uploadDay,
-        chapter: uploadDay ? chapter++ : null
-    });
+    if (i === 0) {
+
+        for (let c = 0; c < 5; c++) {
+
+            schedule.push({
+                date: new Date(date),
+                chapter: chapter++,
+                release: true
+            });
+
+        }
+
+        continue;
+    }
+
+    if (day >= 1 && day <= 5) {
+
+        schedule.push({
+            date: new Date(date),
+            chapter: chapter++,
+            release: true
+        });
+
+    } else {
+
+        schedule.push({
+            date: new Date(date),
+            chapter: null,
+            release: false
+        });
+
+    }
 }
 
 const container = document.getElementById("schedule");
 
-schedule.forEach((item, index) => {
+function formatDate(date) {
 
-    const row = document.createElement("div");
-
-    row.className = "day" + (item.upload ? "" : " rest");
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-
-    checkbox.id = "day-" + index;
-
-    checkbox.checked =
-        localStorage.getItem(checkbox.id) === "true";
-
-    checkbox.addEventListener("change", () => {
-        localStorage.setItem(
-            checkbox.id,
-            checkbox.checked
-        );
+    return date.toLocaleDateString("en-IN", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
     });
 
-    const dateText = document.createElement("span");
-    dateText.className = "date";
+}
 
-    dateText.textContent =
-        item.date.toLocaleDateString("en-IN", {
-            weekday: "short",
-            day: "2-digit",
-            month: "short",
+function renderSchedule() {
+
+    container.innerHTML = "";
+
+    let lastMonth = "";
+
+    schedule.forEach((item, index) => {
+
+        const monthName = item.date.toLocaleDateString("en-IN", {
+            month: "long",
             year: "numeric"
         });
 
-    const chapterText = document.createElement("span");
-    chapterText.className = "chapter";
+        if (monthName !== lastMonth) {
 
-    chapterText.textContent =
-        item.upload
-        ? "Chapter " + item.chapter
-        : "REST";
+            const title = document.createElement("div");
 
-    row.appendChild(checkbox);
-    row.appendChild(dateText);
-    row.appendChild(chapterText);
+            title.className = "section-title";
 
-    container.appendChild(row);
-});
+            title.textContent = monthName;
+
+            container.appendChild(title);
+
+            lastMonth = monthName;
+        }
+
+        const row = document.createElement("div");
+
+        row.className = "day";
+
+        if (!item.release) {
+            row.classList.add("rest");
+        }
+
+        const checkbox = document.createElement("input");
+
+        checkbox.type = "checkbox";
+
+        const key = "BTA_UPLOAD_" + index;
+
+        checkbox.checked =
+            localStorage.getItem(key) === "true";
+
+        if (checkbox.checked) {
+            row.classList.add("done");
+        }
+
+        checkbox.addEventListener("change", function () {
+
+            localStorage.setItem(
+                key,
+                checkbox.checked
+            );
+
+            if (checkbox.checked) {
+                row.classList.add("done");
+            } else {
+                row.classList.remove("done");
+            }
+
+            updateProgress();
+
+        });
+
+        const info = document.createElement("div");
+
+        info.className = "day-info";
+
+        const date = document.createElement("div");
+
+        date.className = "date";
+
+        date.textContent = formatDate(item.date);
+
+        const chapterText = document.createElement("div");
+
+        chapterText.className = "chapter";
+
+        if (item.release) {
+
+            chapterText.textContent =
+                "☐ Upload / Schedule Chapter " +
+                item.chapter;
+
+        } else {
+
+            chapterText.textContent =
+                "REST — No Chapter";
+
+        }
+
+        const release = document.createElement("div");
+
+        release.className = "release";
+
+        if (item.release) {
+
+            release.textContent =
+                "Release: 3:14 PM IST";
+
+        }
+
+        info.appendChild(date);
+        info.appendChild(chapterText);
+        info.appendChild(release);
+
+        row.appendChild(checkbox);
+        row.appendChild(info);
+
+        container.appendChild(row);
+
+    });
+
+    updateProgress();
+}
+
+function updateProgress() {
+
+    const checkboxes =
+        document.querySelectorAll(
+            'input[type="checkbox"]'
+        );
+
+    let completed = 0;
+
+    checkboxes.forEach(cb => {
+
+        if (cb.checked) {
+            completed++;
+        }
+
+    });
+
+    const total =
+        schedule.filter(item => item.release).length;
+
+    const percentage =
+        total === 0
+        ? 0
+        : (completed / total) * 100;
+
+    document.getElementById("progressText")
+        .textContent =
+        completed + " / " + total + " chapters completed";
+
+    document.getElementById("progress")
+        .style.width =
+        percentage + "%";
+}
 
 function resetChecklist() {
-    if (confirm("Reset the entire checklist?")) {
-        localStorage.clear();
-        location.reload();
-    }
+
+    const confirmReset =
+        confirm(
+            "Are you sure you want to reset all checked chapters?"
+        );
+
+    if (!confirmReset) return;
+
+    Object.keys(localStorage)
+        .filter(key =>
+            key.startsWith("BTA_UPLOAD_")
+        )
+        .forEach(key =>
+            localStorage.removeItem(key)
+        );
+
+    renderSchedule();
 }
+
+renderSchedule();
 
 </script>
 
