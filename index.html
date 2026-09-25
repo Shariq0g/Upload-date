@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Before the Last Archive — Upload Checklist</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        padding: 30px 15px;
+        background: #f4f4f4;
+        font-family: Arial, sans-serif;
+        color: #111;
+    }
+
+    .container {
+        max-width: 650px;
+        margin: auto;
+        background: white;
+        padding: 25px;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+        margin-top: 0;
+        font-size: 24px;
+    }
+
+    .info {
+        background: #f0f0f0;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .day {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .day input {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .date {
+        font-weight: bold;
+    }
+
+    .chapter {
+        margin-left: auto;
+        color: #555;
+        font-size: 14px;
+    }
+
+    .rest {
+        background: #fafafa;
+        color: #999;
+    }
+
+    .reset {
+        margin-top: 20px;
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background: #111;
+        color: white;
+        cursor: pointer;
+    }
+
+    .reset:hover {
+        background: #333;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Before the Last Archive</h1>
+
+    <div class="info">
+        Upload schedule: <b>5 days ON + 2 days OFF</b><br>
+        Release time: <b>3:14 PM IST</b>
+    </div>
+
+    <div id="schedule"></div>
+
+    <button class="reset" onclick="resetChecklist()">
+        Reset Checklist
+    </button>
+
+</div>
+
+<script>
+
+const startDate = new Date("2026-09-25T00:00:00");
+
+const schedule = [];
+let chapter = 1;
+
+for (let i = 0; i < 70; i++) {
+
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + i);
+
+    const dayOfCycle = i % 7;
+
+    const uploadDay = dayOfCycle < 5;
+
+    schedule.push({
+        date: date,
+        upload: uploadDay,
+        chapter: uploadDay ? chapter++ : null
+    });
+}
+
+const container = document.getElementById("schedule");
+
+schedule.forEach((item, index) => {
+
+    const row = document.createElement("div");
+
+    row.className = "day" + (item.upload ? "" : " rest");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+
+    checkbox.id = "day-" + index;
+
+    checkbox.checked =
+        localStorage.getItem(checkbox.id) === "true";
+
+    checkbox.addEventListener("change", () => {
+        localStorage.setItem(
+            checkbox.id,
+            checkbox.checked
+        );
+    });
+
+    const dateText = document.createElement("span");
+    dateText.className = "date";
+
+    dateText.textContent =
+        item.date.toLocaleDateString("en-IN", {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+
+    const chapterText = document.createElement("span");
+    chapterText.className = "chapter";
+
+    chapterText.textContent =
+        item.upload
+        ? "Chapter " + item.chapter
+        : "REST";
+
+    row.appendChild(checkbox);
+    row.appendChild(dateText);
+    row.appendChild(chapterText);
+
+    container.appendChild(row);
+});
+
+function resetChecklist() {
+    if (confirm("Reset the entire checklist?")) {
+        localStorage.clear();
+        location.reload();
+    }
+}
+
+</script>
+
+</body>
+</html>
