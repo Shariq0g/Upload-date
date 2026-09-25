@@ -5,12 +5,39 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Before the Last Archive</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f3f3f3;font-family:Arial;color:#111}.app{max-width:620px;margin:auto;padding:18px 12px}.head{background:#111;color:#fff;border-radius:12px;padding:18px;margin-bottom:12px}.head h1{margin:0;font-size:22px}.head p{margin:5px 0 0;color:#aaa;font-size:13px}.tabs{display:flex;gap:6px;margin-bottom:12px}.tab{flex:1;padding:11px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer}.tab.active{background:#111;color:#fff}.stats{display:flex;justify-content:space-between;background:#fff;border:1px solid #ddd;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px}.list{display:flex;flex-direction:column;gap:7px}.chapter{background:#fff;border:1px solid #ddd;border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px}.chapter input{width:20px;height:20px}.info{flex:1}.num{font-weight:bold}.date{font-size:13px;color:#666;margin-top:3px}.time{font-size:11px;color:#999;margin-top:2px}.done{opacity:.5}.done .num{text-decoration:line-through}.launch{border-left:4px solid #111}.rest{color:#aaa}.add{width:100%;margin-top:12px;padding:12px;border:1px dashed #999;background:#fff;border-radius:9px;cursor:pointer}.reset{width:100%;margin-top:7px;padding:10px;border:0;background:#111;color:#fff;border-radius:9px;cursor:pointer}.note{font-size:11px;color:#888;margin:10px 2px}.hidden{display:none}
+*{box-sizing:border-box}
+body{margin:0;background:#f3f3f3;font-family:Arial;color:#111}
+.app{max-width:620px;margin:auto;padding:18px 12px}
+.head{background:#111;color:#fff;border-radius:12px;padding:18px;margin-bottom:12px}
+.head h1{margin:0;font-size:22px}
+.head p{margin:5px 0 0;color:#aaa;font-size:13px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tab{flex:1;padding:11px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer}
+.tab.active{background:#111;color:#fff}
+.stats{display:flex;justify-content:space-between;background:#fff;border:1px solid #ddd;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px}
+.list{display:flex;flex-direction:column;gap:7px}
+.chapter{background:#fff;border:1px solid #ddd;border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px}
+.chapter input{width:20px;height:20px}
+.info{flex:1}
+.num{font-weight:bold}
+.date{font-size:13px;color:#555;margin-top:3px}
+.time{font-size:11px;color:#999;margin-top:2px}
+.done{opacity:.5}
+.done .num{text-decoration:line-through}
+.launch{border-left:4px solid #111}
+.add{width:100%;margin-top:12px;padding:12px;border:1px dashed #999;background:#fff;border-radius:9px;cursor:pointer}
+.reset{width:100%;margin-top:7px;padding:10px;border:0;background:#111;color:#fff;border-radius:9px;cursor:pointer}
+.note{font-size:11px;color:#888;margin:10px 2px}
 </style>
 </head>
+
 <body>
 <div class="app">
-<div class="head"><h1>Before the Last Archive</h1><p>Publishing Checklist</p></div>
+
+<div class="head">
+<h1>Before the Last Archive</h1>
+<p>Publishing Checklist</p>
+</div>
 
 <div class="tabs">
 <button class="tab active" onclick="setPage('webnovel',this)">Webnovel</button>
@@ -27,79 +54,294 @@
 
 <button class="add" onclick="addChapter()">+ Add 1 Chapter</button>
 <button class="reset" onclick="resetData()">Reset</button>
-<div class="note">Checkbox = chapter uploaded/scheduled for its assigned release date.</div>
+
+<div class="note">
+Checkbox = uploaded/scheduled for the assigned release date.
+</div>
+
 </div>
 
 <script>
-const KEY="BTA_TRACKER_V3",START=new Date(2026,8,27);
-let d=JSON.parse(localStorage.getItem(KEY))||{chapters:[]},page="webnovel";
 
-function save(){localStorage.setItem(KEY,JSON.stringify(d))}
-function fmt(x){return x.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
+const KEY="BTA_TRACKER_V4";
+const LAUNCH_YEAR=2026;
+const LAUNCH_MONTH=8;
+const LAUNCH_DAY=27;
 
-function nextDate(prev){
- let x=new Date(prev);x.setDate(x.getDate()+1);
- while(x.getDay()==0||x.getDay()==6)x.setDate(x.getDate()+1);
- return x
+let data=JSON.parse(localStorage.getItem(KEY))||null;
+let page="webnovel";
+
+
+function makeDate(y,m,d){
+    return new Date(y,m,d,12,0,0,0);
 }
 
-function make(n,date){
- return{n,date:date.toISOString().slice(0,10),time:"15:14",done:{webnovel:false,royalroad:false,patreon:false}}
+
+function dateKey(date){
+    const y=date.getFullYear();
+    const m=String(date.getMonth()+1).padStart(2,"0");
+    const d=String(date.getDate()).padStart(2,"0");
+    return `${y}-${m}-${d}`;
 }
 
-if(!d.chapters.length){
- for(let i=1;i<=100;i++){
-  let date;
-  if(i<=5)date=new Date(2026,8,27);
-  else date=nextDate(new Date(d.chapters[i-2].date+"T00:00:00"));
-  d.chapters.push(make(i,date))
- }
- save()
+
+function displayDate(key){
+    const [y,m,d]=key.split("-").map(Number);
+
+    return makeDate(y,m-1,d).toLocaleDateString(
+        "en-IN",
+        {
+            weekday:"long",
+            day:"numeric",
+            month:"long",
+            year:"numeric"
+        }
+    );
 }
 
-function setPage(p,b){
- page=p;
- document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
- b.classList.add("active");render()
+
+function nextReleaseDate(key){
+
+    const [y,m,d]=key.split("-").map(Number);
+
+    let date=makeDate(y,m-1,d);
+
+    date.setDate(date.getDate()+1);
+
+    while(date.getDay()===0 || date.getDay()===6){
+        date.setDate(date.getDate()+1);
+    }
+
+    return dateKey(date);
 }
+
+
+function createChapter(number,date){
+
+    return {
+        number:number,
+        date:date,
+        time:"15:14",
+        done:{
+            webnovel:false,
+            royalroad:false,
+            patreon:false
+        }
+    };
+}
+
+
+function createInitialData(){
+
+    const chapters=[];
+
+    /* First Sunday launch: Chapters 1–5 */
+
+    const launch=dateKey(
+        makeDate(
+            LAUNCH_YEAR,
+            LAUNCH_MONTH,
+            LAUNCH_DAY
+        )
+    );
+
+    for(let i=1;i<=5;i++){
+        chapters.push(
+            createChapter(i,launch)
+        );
+    }
+
+    /*
+       Chapter 6 onward:
+       Monday-Friday only.
+       Saturday/Sunday skipped.
+    */
+
+    let lastDate=launch;
+
+    for(let i=6;i<=100;i++){
+
+        const next=nextReleaseDate(lastDate);
+
+        chapters.push(
+            createChapter(i,next)
+        );
+
+        lastDate=next;
+    }
+
+    return {chapters};
+}
+
+
+if(!data || !Array.isArray(data.chapters)){
+    data=createInitialData();
+    save();
+}
+
+
+function save(){
+    localStorage.setItem(
+        KEY,
+        JSON.stringify(data)
+    );
+}
+
+
+function setPage(platform,button){
+
+    page=platform;
+
+    document
+        .querySelectorAll(".tab")
+        .forEach(x=>x.classList.remove("active"));
+
+    button.classList.add("active");
+
+    render();
+}
+
 
 function render(){
- let list=document.getElementById("list");list.innerHTML="";
- let done=0;
 
- d.chapters.forEach(c=>{
-  if(c.done[page])done++;
-  let row=document.createElement("div");
-  row.className="chapter"+(c.done[page]?" done":"")+(c.n<=5?" launch":"");
-  row.innerHTML=`<input type="checkbox" ${c.done[page]?"checked":""}>
-  <div class="info"><div class="num">Chapter ${c.n}</div>
-  <div class="date">${fmt(new Date(c.date+"T00:00:00"))}</div>
-  <div class="time">${c.time} IST ${c.n<=5?"• LAUNCH":""}</div></div>`;
-  row.querySelector("input").onchange=e=>{
-   c.done[page]=e.target.checked;save();render()
-  };
-  list.appendChild(row)
- });
+    const list=document.getElementById("list");
 
- document.getElementById("count").textContent=done+" / "+d.chapters.length+" scheduled";
- document.getElementById("percent").textContent=Math.round(done/d.chapters.length*100)+"%";
+    list.innerHTML="";
+
+    let done=0;
+
+    data.chapters.forEach(chapter=>{
+
+        if(chapter.done[page]){
+            done++;
+        }
+
+        const row=document.createElement("div");
+
+        row.className="chapter";
+
+        if(chapter.done[page]){
+            row.classList.add("done");
+        }
+
+        if(chapter.number<=5){
+            row.classList.add("launch");
+        }
+
+        const checkbox=document.createElement("input");
+
+        checkbox.type="checkbox";
+
+        checkbox.checked=chapter.done[page];
+
+        checkbox.onchange=()=>{
+
+            chapter.done[page]=checkbox.checked;
+
+            save();
+            render();
+        };
+
+
+        const info=document.createElement("div");
+
+        info.className="info";
+
+        const num=document.createElement("div");
+
+        num.className="num";
+
+        num.textContent=
+            "Chapter "+chapter.number;
+
+
+        const date=document.createElement("div");
+
+        date.className="date";
+
+        date.textContent=
+            displayDate(chapter.date);
+
+
+        const time=document.createElement("div");
+
+        time.className="time";
+
+        time.textContent=
+            chapter.time+
+            " IST"+
+            (
+                chapter.number<=5
+                ? " • LAUNCH"
+                : ""
+            );
+
+
+        info.appendChild(num);
+        info.appendChild(date);
+        info.appendChild(time);
+
+        row.appendChild(checkbox);
+        row.appendChild(info);
+
+        list.appendChild(row);
+    });
+
+
+    document.getElementById("count").textContent=
+        done+" / "+data.chapters.length+" scheduled";
+
+
+    document.getElementById("percent").textContent=
+        Math.round(
+            done/data.chapters.length*100
+        )+"%";
 }
+
 
 function addChapter(){
- let last=d.chapters[d.chapters.length-1];
- let date=nextDate(new Date(last.date+"T00:00:00"));
- let n=last.n+1;
- d.chapters.push(make(n,date));
- save();render();
+
+    const last=
+        data.chapters[data.chapters.length-1];
+
+    const nextDate=
+        nextReleaseDate(last.date);
+
+    const nextNumber=
+        last.number+1;
+
+    data.chapters.push(
+        createChapter(
+            nextNumber,
+            nextDate
+        )
+    );
+
+    save();
+    render();
+
+    window.scrollTo({
+        top:document.body.scrollHeight,
+        behavior:"smooth"
+    });
 }
+
 
 function resetData(){
- if(confirm("Reset all saved progress?")){
-  localStorage.removeItem(KEY);location.reload()
- }
+
+    if(!confirm("Reset all saved progress?")){
+        return;
+    }
+
+    data=createInitialData();
+
+    save();
+    render();
 }
 
+
 render();
+
 </script>
 </body>
 </html>
