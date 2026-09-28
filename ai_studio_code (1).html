@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FORGE OS | Fitness Operating System</title>
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --card: #1a1a1a;
+            --card-hover: #252525;
+            --primary: #ff471a;
+            --primary-glow: rgba(255, 71, 26, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --border: #333333;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --nav-height: 70px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg); color: var(--text-main); line-height: 1.5; padding-bottom: var(--nav-height); }
+        
+        /* Typography & Utilities */
+        h1, h2, h3 { margin-bottom: 0.5rem; font-weight: 700; }
+        .text-muted { color: var(--text-muted); font-size: 0.9rem; }
+        .text-center { text-align: center; }
+        .flex { display: flex; }
+        .flex-col { display: flex; flex-direction: column; }
+        .justify-between { justify-content: space-between; }
+        .align-center { align-items: center; }
+        .gap-1 { gap: 0.5rem; } .gap-2 { gap: 1rem; } .gap-3 { gap: 1.5rem; }
+        .mt-1 { margin-top: 0.5rem; } .mt-2 { margin-top: 1rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .hidden { display: none !important; }
+        
+        /* App Structure */
+        .page { display: none; padding: 1.5rem; animation: fadeIn 0.3s ease; max-width: 800px; margin: 0 auto; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* UI Components */
+        .card { background: var(--card); border-radius: 12px; padding: 1.2rem; border: 1px solid var(--border); margin-bottom: 1rem; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+        
+        .btn { background: var(--card-hover); color: var(--text-main); border: 1px solid var(--border); padding: 0.8rem 1.2rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .btn:hover { background: #333; }
+        .btn-primary { background: var(--primary); border: none; color: white; box-shadow: 0 4px 15px var(--primary-glow); }
+        .btn-primary:hover { background: #e63e15; }
+        .btn-success { background: var(--success); border: none; }
+        .btn-danger { background: var(--danger); border: none; }
+        .btn-block { width: 100%; display: block; }
+        
+        input, select { background: var(--bg); color: var(--text-main); border: 1px solid var(--border); padding: 0.8rem; border-radius: 8px; width: 100%; font-size: 1rem; margin-bottom: 1rem; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); }
+        label { display: block; margin-bottom: 0.4rem; font-weight: 600; color: var(--text-muted); font-size: 0.9rem; }
+        
+        /* Bottom Navigation */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-height); background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); cursor: pointer; font-size: 0.75rem; font-weight: 600; padding: 0.5rem; transition: color 0.2s; }
+        .nav-item svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
+        .nav-item.active { color: var(--primary); }
+
+        /* Progress Bars */
+        .progress-container { width: 100%; background: var(--bg); border-radius: 8px; height: 8px; overflow: hidden; margin-top: 0.5rem; }
+        .progress-bar { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+        .progress-bar.protein { background: #4dabf7; }
+        .progress-bar.carbs { background: #ffc107; }
+        .progress-bar.fat { background: #dc3545; }
+
+        /* Specific Page Styles */
+        .stat-value { font-size: 2rem; font-weight: 800; }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        
+        .macro-circles { display: flex; justify-content: space-between; text-align: center; margin-top: 1rem; }
+        .macro-circle { display: flex; flex-direction: column; align-items: center; }
+        
+        .exercise-list-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .set-row { display: grid; grid-template-columns: 50px 1fr 1fr 50px; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+        .set-row input { margin-bottom: 0; text-align: center; }
+        .set-check { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .set-check.done { background: var(--success); border-color: var(--success); color: white; }
+
+        /* Toast Notifications */
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--card); color: white; padding: 12px 24px; border-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-weight: 600; border: 1px solid var(--border); animation: slideDown 0.3s, fadeOut 0.3s 2.7s forwards; }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOut { to { opacity: 0; } }
+
+        /* Timer Overlay */
+        #timer-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        .timer-display { font-size: 5rem; font-weight: bold; font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+<body>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container"></div>
+
+    <!-- TIMER OVERLAY -->
+    <div id="timer-overlay">
+        <h2>Rest Timer</h2>
+        <div class="timer-display" id="timer-time">01:30</div>
+        <div class="flex gap-2 mt-2">
+            <button class="btn btn-primary" onclick="App.Timer.addTime(15)">+15s</button>
+            <button class="btn" onclick="App.Timer.stop()">Skip</button>
+        </div>
+    </div>
+
+    <!-- ONBOARDING PAGE -->
+    <section id="page-onboarding" class="page">
+        <div class="text-center mb-2">
+            <h1 style="color: var(--primary); font-size: 2.5rem; letter-spacing: 2px;">FORGE OS</h1>
+            <p class="text-muted">Initialize Your Fitness Protocol</p>
+        </div>
+        <form id="onboarding-form" class="card">
+            <div id="ob-step-1">
+                <h3>Personal Metrics</h3>
+                <label>Name</label><input type="text" id="ob-name" required>
+                <div class="grid-2">
+                    <div><label>Age</label><input type="number" id="ob-age" min="12" max="100" required></div>
+                    <div>
+                        <label>Gender</label>
+                        <select id="ob-gender">
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                    <div><label>Height (cm)</label><input type="number" id="ob-height" min="100" max="250" required></div>
+                    <div><label>Weight (kg)</label><input type="number" id="ob-weight" min="30" max="300" required></div>
+                </div>
+                <button type="button" class="btn btn-primary btn-block mt-2" onclick="App.Onboarding.next(1)">Next Step</button>
+            </div>
+            
+            <div id="ob-step-2" class="hidden">
+                <h3>Goals & Lifestyle</h3>
+                <label>Primary Goal</label>
+                <select id="ob-goal">
+                    <option value="fat_loss">Fat Loss</option>
+                    <option value="muscle_gain">Muscle Gain</option>
+                    <option value="recomp">Recomposition (Build & Burn)</option>
+                    <option value="strength">Pure Strength</option>
+                </select>
+                <label>Activity Level</label>
+                <select id="ob-activity">
+                    <option value="1.2">Sedentary (Office job, no exercise)</option>
+                    <option value="1.375">Lightly Active (1-3 days/wk)</option>
+                    <option value="1.55">Moderately Active (3-5 days/wk)</option>
+                    <option value="1.725">Very Active (6-7 days/wk)</option>
+                </select>
+                <label>Target Weight (kg)</label>
+                <input type="number" id="ob-target-weight" required>
+                <div class="flex gap-2 mt-2">
+                    <button type="button" class="btn" onclick="App.Onboarding.prev(2)">Back</button>
+                    <button type="button" class="btn btn-primary flex-1" style="flex:1" onclick="App.Onboarding.next(2)">Next Step</button>
+                </div>
+            </div>
+
+            <div id="ob-step-3" class="hidden">
+                <h3>Training Configuration</h3>
+                <label>Fitness Level</label>
+                <select id="ob-level">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>
+                <label>Available Equipment</label>
+                <div style="max-height: 150px; overflow-y: auto; background: var(--bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 1rem;">
+                    <label style="display:flex; align-items:center; gap:10px;"><input type="checkbox" name="equip" value="bodyweight" checked disabled> Bodyweight (Required)</label>
+                    <label style="display:flex; align-items:center; gap:10px;"><input type="checkbox" name="equip" value="dumbbells"> Dumbbells</label>
+                    <label style="display:flex; align-items:center; gap:10px;"><input type="checkbox" name="equip" value="barbell"> Barbell & Plates</label>
+                    <label style="display:flex; align-items:center; gap:10px;"><input type="checkbox" name="equip" value="ezbar"> EZ/Curl Bar</label>
+                    <label style="display:flex; align-items:center; gap:10px;"><input type="checkbox" name="equip" value="bench"> Bench</label>
+                    <label style="display:flex; align-items:center; gap:10px;"><input type="checkbox" name="equip" value="pullupbar"> Pull-up Bar</label>
+                    <label style="display:flex; align-items:center; gap:10px;"><input type="checkbox" name="equip" value="cables"> Cable Machine</label>
+                </div>
+                <div class="grid-2">
+                    <div><label>Workout Days/Week</label><input type="number" id="ob-days" min="2" max="6" value="4"></div>
+                    <div><label>Duration (mins)</label><input type="number" id="ob-duration" min="15" max="120" value="60"></div>
+                </div>
+                <div class="flex gap-2 mt-2">
+                    <button type="button" class="btn" onclick="App.Onboarding.prev(3)">Back</button>
+                    <button type="submit" class="btn btn-primary flex-1" style="flex:1">Generate Plan</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <!-- DASHBOARD PAGE -->
+    <section id="page-dashboard" class="page">
+        <div class="flex justify-between align-center mb-2">
+            <div>
+                <h2 id="dash-greeting">Welcome, User</h2>
+                <p class="text-muted" id="dash-date">Monday, Sep 28</p>
+            </div>
+            <div class="text-center">
+                <div style="background: var(--card); padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid var(--primary); color: var(--primary); font-weight: bold;">
+                    Lvl <span id="dash-level">1</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="dash-checkin-card">
+            <h3>Daily Protocol</h3>
+            <p class="text-muted mb-2">Log your recovery metrics to adjust today's plan.</p>
+            <button class="btn btn-primary btn-block" onclick="App.Navigation.go('checkin')">Daily Check-In</button>
+        </div>
+
+        <div class="card">
+            <h3>Today's Training</h3>
+            <div id="dash-workout-preview" class="mt-1 mb-2">
+                <!-- Injected via JS -->
+            </div>
+            <button class="btn btn-primary btn-block" onclick="App.Navigation.go('workout')">Start Workout</button>
+        </div>
+
+        <div class="card">
+            <h3>Nutrition Summary</h3>
+            <div class="flex justify-between align-center mt-1">
+                <div>
+                    <div class="stat-value" id="dash-cal-consumed">0</div>
+                    <div class="stat-label">Eaten</div>
+                </div>
+                <div class="text-center">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);" id="dash-cal-remaining">2000</div>
+                    <div class="stat-label">Remaining</div>
+                </div>
+                <div class="text-right">
+                    <div class="stat-value text-muted" id="dash-cal-target">2000</div>
+                    <div class="stat-label">Target</div>
+                </div>
+            </div>
+            <div class="progress-container mt-2"><div class="progress-bar" id="dash-cal-bar" style="width: 0%"></div></div>
+            
+            <div class="macro-circles mt-2">
+                <div class="macro-circle">
+                    <span id="dash-pro-val">0g</span>
+                    <div class="progress-container" style="width: 60px;"><div class="progress-bar protein" id="dash-pro-bar" style="width: 0%"></div></div>
+                    <span class="stat-label mt-1">Protein</span>
+                </div>
+                <div class="macro-circle">
+                    <span id="dash-carb-val">0g</span>
+                    <div class="progress-container" style="width: 60px;"><div class="progress-bar carbs" id="dash-carb-bar" style="width: 0%"></div></div>
+                    <span class="stat-label mt-1">Carbs</span>
+                </div>
+                <div class="macro-circle">
+                    <span id="dash-fat-val">0g</span>
+                    <div class="progress-container" style="width: 60px;"><div class="progress-bar fat" id="dash-fat-bar" style="width: 0%"></div></div>
+                    <span class="stat-label mt-1">Fat</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card text-center">
+                <div class="stat-value" id="dash-streak">0</div>
+                <div class="stat-label">Day Streak</div>
+            </div>
+            <div class="card text-center">
+                <div class="stat-value" id="dash-recovery">--</div>
+                <div class="stat-label">Recovery Score</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DAILY CHECK-IN -->
+    <section id="page-checkin" class="page">
+        <h2>Daily Check-In</h2>
+        <p class="text-muted mb-2">Honest tracking creates accurate plans.</p>
+        
+        <form id="checkin-form" class="card">
+            <label>Current Weight (kg)</label>
+            <input type="number" step="0.1" id="ci-weight" required>
+            
+            <label>Sleep (Hours)</label>
+            <input type="number" step="0.5" id="ci-sleep" min="0" max="24" required>
+            
+            <label>Energy Level (1-10)</label>
+            <input type="range" id="ci-energy" min="1" max="10" value="7" style="width:100%; margin-bottom:1rem;">
+            
+            <label>Muscle Soreness (1-10, 10=Painful)</label>
+            <input type="range" id="ci-soreness" min="1" max="10" value="3" style="width:100%; margin-bottom:1rem;">
+            
+            <button type="submit" class="btn btn-primary btn-block">Submit & Adjust Plan</button>
+        </form>
+    </section>
+
+    <!-- WORKOUT SYSTEM -->
+    <section id="page-workout" class="page">
+        <div id="workout-pre">
+            <h2>Today's Workout</h2>
+            <div class="card mt-2" id="workout-summary-card">
+                <!-- JS populated -->
+            </div>
+            <button class="btn btn-primary btn-block" onclick="App.Workout.start()">Initialize Session</button>
+        </div>
+        
+        <div id="workout-active" class="hidden">
+            <div class="flex justify-between align-center mb-2">
+                <h3 id="active-wo-name" style="color:var(--primary)">Workout</h3>
+                <button class="btn btn-danger" style="padding: 0.3rem 0.6rem" onclick="App.Workout.cancel()">Abort</button>
+            </div>
+            
+            <div id="exercise-container">
+                <!-- Exercises injected here -->
+            </div>
+            
+            <button class="btn btn-success btn-block mt-2" onclick="App.Workout.finish()">Complete Workout</button>
+        </div>
+    </section>
+
+    <!-- NUTRITION SYSTEM -->
+    <section id="page-nutrition" class="page">
+        <h2>Nutrition Center</h2>
+        
+        <div class="card">
+            <div class="flex justify-between align-center mb-1">
+                <h3>Add Food</h3>
+                <span class="text-muted">Database contains Indian & Global foods</span>
+            </div>
+            <input type="text" id="food-search" placeholder="Search food (e.g., Rice, Paneer, Chicken)..." onkeyup="App.Nutrition.searchFood()">
+            <div id="food-search-results" style="max-height: 200px; overflow-y:auto; margin-bottom: 1rem;"></div>
+            
+            <div id="food-entry-panel" class="hidden" style="background: var(--bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+                <h4 id="fe-name" class="mb-1">Food Name</h4>
+                <div class="grid-2">
+                    <div>
+                        <label>Quantity (grams/ml)</label>
+                        <input type="number" id="fe-qty" value="100" onchange="App.Nutrition.updateFoodEntry()">
+                    </div>
+                    <div>
+                        <label>Meal</label>
+                        <select id="fe-meal">
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Dinner">Dinner</option>
+                            <option value="Snacks">Snacks</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="text-muted mb-1" id="fe-macros">0 kcal | P: 0g | C: 0g | F: 0g</div>
+                <button class="btn btn-primary btn-block" onclick="App.Nutrition.logFood()">Log Food</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Today's Log</h3>
+            <div id="nutrition-log" class="mt-1">
+                <!-- Log injected via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- PROGRESS / ANALYTICS -->
+    <section id="page-progress" class="page">
+        <h2>Progress & Analytics</h2>
+        
+        <div class="card">
+            <h3>Weight Trend (Last 30 Days)</h3>
+            <div style="height: 200px; width: 100%; margin-top: 1rem; position: relative;" id="chart-weight">
+                <!-- SVG Chart Injected -->
+            </div>
+        </div>
+        
+        <div class="card grid-2 text-center">
+            <div>
+                <div class="stat-value" id="prog-start-wt">0</div>
+                <div class="stat-label">Start Weight</div>
+            </div>
+            <div>
+                <div class="stat-value" id="prog-curr-wt">0</div>
+                <div class="stat-label">Current Weight</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Lifetime Stats</h3>
+            <ul style="list-style: none; color: var(--text-muted);" class="mt-1">
+                <li class="flex justify-between mb-1"><span>Total Workouts:</span> <strong id="stat-workouts" style="color:var(--text-main)">0</strong></li>
+                <li class="flex justify-between mb-1"><span>Total Volume Lifted:</span> <strong id="stat-volume" style="color:var(--text-main)">0 kg</strong></li>
+                <li class="flex justify-between"><span>App Level:</span> <strong id="stat-level" style="color:var(--text-main)">1</strong></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- PROFILE / SETTINGS -->
+    <section id="page-profile" class="page">
+        <h2>Profile & Settings</h2>
+        
+        <div class="card mt-2">
+            <h3>System Data</h3>
+            <p class="text-muted mb-2">FORGE OS operates entirely offline. Your data stays on this device.</p>
+            <div class="flex-col gap-1">
+                <button class="btn" onclick="App.Data.export()">Export Data (Backup)</button>
+                <button class="btn btn-danger" onclick="App.Data.reset()">Factory Reset</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav" id="main-nav" style="display:none;">
+        <div class="nav-item active" onclick="App.Navigation.go('dashboard')">
+            <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+            Dashboard
+        </div>
+        <div class="nav-item" onclick="App.Navigation.go('workout')">
+            <svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/></svg>
+            Workout
+        </div>
+        <div class="nav-item" onclick="App.Navigation.go('nutrition')">
+            <svg viewBox="0 0 24 24"><path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/></svg>
+            Nutrition
+        </div>
+        <div class="nav-item" onclick="App.Navigation.go('progress')">
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            Progress
+        </div>
+        <div class="nav-item" onclick="App.Navigation.go('profile')">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            Profile
+        </div>
+    </nav>
+
+    <!-- CORE JAVASCRIPT APP -->
+    <script>
+        /**
+         * FORGE OS - Core Logic
+         * Monolithic Architecture for offline-first standalone execution.
+         */
+        
+        const App = {
+            db: null,
+            state: { user: null, today: new Date().toISOString().split('T')[0], activeWorkout: null, lastCheckIn: null },
+            
+            // --- 1. DATABASE (IndexedDB) ---
+            DB: {
+                init: function() {
+                    return new Promise((resolve, reject) => {
+                        if (!window.indexedDB) {
+                            return reject(new Error("IndexedDB is not supported by your browser."));
+                        }
+                        try {
+                            const request = window.indexedDB.open("ForgeOS", 1);
+                            
+                            request.onupgradeneeded = (e) => {
+                                const db = e.target.result;
+                                const stores = [
+                                    { name: "user", key: "id" },
+                                    { name: "exercises", key: "id" },
+                                    { name: "foods", key: "id" },
+                                    { name: "history", key: "id" },
+                                    { name: "meals", key: "id" },
+                                    { name: "checkins", key: "date" },
+                                    { name: "weightLog", key: "date" }
+                                ];
+                                
+                                stores.forEach(store => {
+                                    if(!db.objectStoreNames.contains(store.name)) {
+                                        db.createObjectStore(store.name, { keyPath: store.key });
+                                    }
+                                });
+                            };
+                            
+                            request.onsuccess = (e) => { 
+                                App.db = e.target.result; 
+                                resolve(); 
+                            };
+                            
+                            request.onerror = (e) => {
+                                reject(new Error(e.target.error ? e.target.error.message : "Browser security blocked database access."));
+                            };
+                        } catch(err) {
+                            reject(err);
+                        }
+                    });
+                },
+                get: (store, id) => new Promise((res, rej) => {
+                    try {
+                        const req = App.db.transaction(store).objectStore(store).get(id);
+                        req.onsuccess = () => res(req.result);
+                        req.onerror = () => rej(req.error);
+                    } catch (e) { rej(e); }
+                }),
+                put: (store, data) => new Promise((res, rej) => {
+                    try {
+                        const req = App.db.transaction(store, "readwrite").objectStore(store).put(data);
+                        req.onsuccess = () => res();
+                        req.onerror = () => rej(req.error);
+                    } catch (e) { rej(e); }
+                }),
+                getAll: (store) => new Promise((res, rej) => {
+                    try {
+                        const req = App.db.transaction(store).objectStore(store).getAll();
+                        req.onsuccess = () => res(req.result);
+                        req.onerror = () => rej(req.error);
+                    } catch (e) { rej(e); }
+                }),
+                clear: (store) => new Promise((res, rej) => {
+                    try {
+                        const req = App.db.transaction(store, "readwrite").objectStore(store).clear();
+                        req.onsuccess = () => res();
+                        req.onerror = () => rej(req.error);
+                    } catch (e) { rej(e); }
+                })
+            },
+
+            // --- 2. SEED DATA ---
+            Seed: {
+                exercises: [
+                    {id:"e1", name:"Push-ups", muscle:"Chest", equip:["bodyweight"], type:"compound"},
+                    {id:"e2", name:"Bodyweight Squats", muscle:"Quads", equip:["bodyweight"], type:"compound"},
+                    {id:"e3", name:"Dumbbell Bench Press", muscle:"Chest", equip:["dumbbells", "bench"], type:"compound"},
+                    {id:"e4", name:"Dumbbell Floor Press", muscle:"Chest", equip:["dumbbells", "bodyweight"], type:"compound"},
+                    {id:"e5", name:"Dumbbell Rows", muscle:"Back", equip:["dumbbells"], type:"compound"},
+                    {id:"e6", name:"Pull-ups", muscle:"Back", equip:["pullupbar"], type:"compound"},
+                    {id:"e7", name:"Dumbbell Shoulder Press", muscle:"Shoulders", equip:["dumbbells"], type:"compound"},
+                    {id:"e8", name:"Lateral Raises", muscle:"Shoulders", equip:["dumbbells"], type:"isolation"},
+                    {id:"e9", name:"Dumbbell Curls", muscle:"Biceps", equip:["dumbbells"], type:"isolation"},
+                    {id:"e10", name:"EZ Bar Curls", muscle:"Biceps", equip:["ezbar"], type:"isolation"},
+                    {id:"e11", name:"Overhead Tricep Ext", muscle:"Triceps", equip:["dumbbells"], type:"isolation"},
+                    {id:"e12", name:"Dumbbell Lunges", muscle:"Legs", equip:["dumbbells"], type:"compound"},
+                    {id:"e13", name:"Dumbbell RDL", muscle:"Hamstrings", equip:["dumbbells"], type:"compound"},
+                    {id:"e14", name:"Crunches", muscle:"Core", equip:["bodyweight"], type:"isolation"},
+                    {id:"e15", name:"Plank", muscle:"Core", equip:["bodyweight"], type:"isolation"}
+                ],
+                foods: [
+                    {id:"f1", name:"Cooked White Rice", cals: 130, pro: 2.7, carb: 28, fat: 0.3},
+                    {id:"f2", name:"Roti / Chapati (Whole Wheat)", cals: 297, pro: 9, carb: 60, fat: 1.5},
+                    {id:"f3", name:"Dal Makhani", cals: 130, pro: 5, carb: 16, fat: 5},
+                    {id:"f4", name:"Yellow Moong Dal", cals: 116, pro: 8, carb: 20, fat: 1},
+                    {id:"f5", name:"Paneer (Raw)", cals: 296, pro: 14, carb: 3, fat: 25},
+                    {id:"f6", name:"Chicken Breast (Cooked)", cals: 165, pro: 31, carb: 0, fat: 3.6},
+                    {id:"f7", name:"Whole Egg (Boiled)", cals: 155, pro: 13, carb: 1.1, fat: 11},
+                    {id:"f8", name:"Oats (Dry)", cals: 389, pro: 16.9, carb: 66, fat: 6.9},
+                    {id:"f9", name:"Whey Protein Concentrate", cals: 400, pro: 80, carb: 6, fat: 6},
+                    {id:"f10", name:"Peanut Butter", cals: 588, pro: 25, carb: 20, fat: 50},
+                    {id:"f11", name:"Banana", cals: 89, pro: 1.1, carb: 23, fat: 0.3},
+                    {id:"f12", name:"Soya Chunks", cals: 345, pro: 52, carb: 33, fat: 0.5}
+                ],
+                run: async function() {
+                    const ex = await App.DB.getAll("exercises");
+                    if(ex.length === 0) {
+                        for(let e of this.exercises) await App.DB.put("exercises", e);
+                        for(let f of this.foods) await App.DB.put("foods", f);
+                    }
+                }
+            },
+
+            // --- 3. UTILITIES ---
+            Utils: {
+                toast: function(msg) {
+                    const t = document.createElement("div"); t.className = "toast"; t.innerText = msg;
+                    document.getElementById("toast-container").appendChild(t);
+                    setTimeout(() => t.remove(), 3000);
+                },
+                addXP: async function(amount) {
+                    if(!App.state.user) return;
+                    App.state.user.xp += amount;
+                    const oldLvl = App.state.user.level;
+                    App.state.user.level = Math.floor(Math.sqrt(App.state.user.xp / 100)) + 1;
+                    await App.DB.put("user", App.state.user);
+                    this.toast(`+${amount} XP Gained!`);
+                    if(App.state.user.level > oldLvl) this.toast(`LEVEL UP! You are now Level ${App.state.user.level}`);
+                    App.Dashboard.render();
+                },
+                uuid: () => Math.random().toString(36).substring(2) + Date.now().toString(36)
+            },
+
+            // --- 4. NAVIGATION ---
+            Navigation: {
+                go: function(pageId) {
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    document.getElementById('page-' + pageId).classList.add('active');
+                    
+                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                    const navBtn = document.querySelector(`.nav-item[onclick="App.Navigation.go('${pageId}')"]`);
+                    if(navBtn) navBtn.classList.add('active');
+
+                    if(pageId === 'dashboard') App.Dashboard.render();
+                    if(pageId === 'workout') App.Workout.renderPre();
+                    if(pageId === 'nutrition') App.Nutrition.renderLog();
+                    if(pageId === 'progress') App.Progress.render();
+                    window.scrollTo(0,0);
+                }
+            },
+
+            // --- 5. ONBOARDING ---
+            Onboarding: {
+                next: (step) => {
+                    const isValid = Array.from(document.getElementById(`ob-step-${step}`).querySelectorAll('input')).every(i => i.checkValidity());
+                    if(!isValid) { App.Utils.toast("Please fill all fields correctly."); return; }
+                    document.getElementById(`ob-step-${step}`).classList.add("hidden");
+                    document.getElementById(`ob-step-${step+1}`).classList.remove("hidden");
+                },
+                prev: (step) => {
+                    document.getElementById(`ob-step-${step}`).classList.add("hidden");
+                    document.getElementById(`ob-step-${step-1}`).classList.remove("hidden");
+                },
+                submit: async function(e) {
+                    e.preventDefault();
+                    const age = parseInt(document.getElementById("ob-age").value);
+                    const weight = parseFloat(document.getElementById("ob-weight").value);
+                    const height = parseInt(document.getElementById("ob-height").value);
+                    const gender = document.getElementById("ob-gender").value;
+                    const act = parseFloat(document.getElementById("ob-activity").value);
+                    const goal = document.getElementById("ob-goal").value;
+                    
+                    // Mifflin-St Jeor BMR
+                    let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+                    bmr += (gender === 'male') ? 5 : -161;
+                    let tdee = bmr * act;
+                    
+                    let targetCals = tdee;
+                    if(goal === 'fat_loss') targetCals -= 500;
+                    else if(goal === 'muscle_gain') targetCals += 300;
+
+                    let protein = weight * 2.2; // 2.2g per kg
+                    let fat = (targetCals * 0.25) / 9;
+                    let carbs = (targetCals - (protein*4) - (fat*9)) / 4;
+
+                    const equipNodes = document.querySelectorAll('input[name="equip"]:checked');
+                    const equip = Array.from(equipNodes).map(n => n.value);
+
+                    const user = {
+                        id: "main",
+                        name: document.getElementById("ob-name").value,
+                        weight, targetWeight: parseFloat(document.getElementById("ob-target-weight").value),
+                        level: 1, xp: 0, streak: 0,
+                        targets: { cals: Math.round(targetCals), pro: Math.round(protein), carb: Math.round(carbs), fat: Math.round(fat) },
+                        equip, days: parseInt(document.getElementById("ob-days").value),
+                        lastWorkoutDate: null
+                    };
+
+                    await App.DB.put("user", user);
+                    await App.DB.put("weightLog", {date: App.state.today, weight: weight});
+                    App.state.user = user;
+                    
+                    document.getElementById("main-nav").style.display = "flex";
+                    App.WorkoutEngine.generateTemplate();
+                    App.Navigation.go('dashboard');
+                    App.Utils.toast("Profile Created Successfully!");
+                }
+            },
+
+            // --- 6. DASHBOARD ---
+            Dashboard: {
+                render: async function() {
+                    const u = App.state.user;
+                    document.getElementById("dash-greeting").innerText = `Welcome, ${u.name.split(' ')[0]}`;
+                    
+                    // Date display formatter
+                    const dateOptions = { weekday: 'long', month: 'short', day: 'numeric' };
+                    document.getElementById("dash-date").innerText = new Date(App.state.today).toLocaleDateString(undefined, dateOptions);
+                    
+                    document.getElementById("dash-level").innerText = u.level;
+                    document.getElementById("dash-streak").innerText = u.streak;
+
+                    // Check Check-in status
+                    const checkin = await App.DB.get("checkins", App.state.today);
+                    if(checkin) {
+                        document.getElementById("dash-checkin-card").classList.add("hidden");
+                        document.getElementById("dash-recovery").innerText = checkin.score;
+                    } else {
+                        document.getElementById("dash-checkin-card").classList.remove("hidden");
+                        document.getElementById("dash-recovery").innerText = "--";
+                    }
+
+                    // Nutrition Macros
+                    const meals = (await App.DB.get("meals", App.state.today)) || {cals:0, pro:0, carb:0, fat:0, logs:[]};
+                    document.getElementById("dash-cal-consumed").innerText = Math.round(meals.cals);
+                    document.getElementById("dash-cal-target").innerText = u.targets.cals;
+                    document.getElementById("dash-cal-remaining").innerText = Math.max(0, u.targets.cals - Math.round(meals.cals));
+                    document.getElementById("dash-cal-bar").style.width = Math.min(100, (meals.cals / u.targets.cals)*100) + "%";
+
+                    const updateMacro = (id, val, target) => {
+                        document.getElementById(`dash-${id}-val`).innerText = Math.round(val) + "g";
+                        document.getElementById(`dash-${id}-bar`).style.width = Math.min(100, (val / target)*100) + "%";
+                    };
+                    updateMacro("pro", meals.pro, u.targets.pro);
+                    updateMacro("carb", meals.carb, u.targets.carb);
+                    updateMacro("fat", meals.fat, u.targets.fat);
+
+                    // Workout Status
+                    const todayHist = await App.DB.get("history", App.state.today);
+                    if(todayHist) {
+                        document.getElementById("dash-workout-preview").innerHTML = `<div class="text-center text-muted">Workout Completed Today! 🏆</div>`;
+                    } else {
+                        const template = await App.WorkoutEngine.getTodayTemplate();
+                        document.getElementById("dash-workout-preview").innerHTML = `<strong>${template.name}</strong><br><span class="text-muted">${template.exercises.length} Exercises | ~${template.exercises.length*10} Mins</span>`;
+                    }
+                }
+            },
+
+            // --- 7. WORKOUT ENGINE ---
+            WorkoutEngine: {
+                getTodayTemplate: async function() {
+                    // Intelligent fallback: generates on the fly based on equipment
+                    const exercises = await App.DB.getAll("exercises");
+                    const u = App.state.user;
+                    
+                    // Filter by equipment matching
+                    const availableEx = exercises.filter(ex => ex.equip.every(eq => u.equip.includes(eq)));
+                    
+                    // Simple full body selection for logic brevity
+                    const chest = availableEx.filter(e=>e.muscle==="Chest");
+                    const back = availableEx.filter(e=>e.muscle==="Back");
+                    const legs = availableEx.filter(e=>e.muscle==="Legs" || e.muscle==="Quads" || e.muscle==="Hamstrings");
+                    const core = availableEx.filter(e=>e.muscle==="Core");
+                    
+                    const pick = (arr) => arr.length ? arr[Math.floor(Math.random()*arr.length)] : null;
+                    
+                    let selection = [pick(chest), pick(back), pick(legs), pick(core)].filter(x=>x);
+                    
+                    // Modify sets/reps based on recovery
+                    const ci = await App.DB.get("checkins", App.state.today);
+                    let sets = 3;
+                    if(ci && ci.score < 50) sets = 2; // Auto-regulate volume
+                    
+                    return {
+                        name: "Daily Adaptation Protocol",
+                        exercises: selection.map(ex => {
+                            let s = [];
+                            for(let i=0; i<sets; i++) s.push({reps: 10, weight: 0, done: false}); // 0 weight implies bodyweight or find-your-weight
+                            return { id: ex.id, name: ex.name, sets: s }
+                        })
+                    }
+                },
+                generateTemplate: () => {} // Hook for broader weekly generation
+            },
+
+            Workout: {
+                template: null,
+                active: false,
+                renderPre: async function() {
+                    const todayHist = await App.DB.get("history", App.state.today);
+                    if(todayHist) {
+                        document.getElementById("workout-summary-card").innerHTML = `<div class="text-center" style="padding: 2rem 0; color: var(--success);">Workout Complete!<br>Rest up for tomorrow.</div>`;
+                        document.querySelector("#workout-pre button").classList.add("hidden");
+                        return;
+                    }
+                    this.template = await App.WorkoutEngine.getTodayTemplate();
+                    let html = `<ul style="list-style:none; padding:0;">`;
+                    this.template.exercises.forEach(ex => {
+                        html += `<li class="mb-1"><strong>${ex.name}</strong><br><span class="text-muted">${ex.sets.length} sets x 10 reps</span></li>`;
+                    });
+                    html += `</ul>`;
+                    document.getElementById("workout-summary-card").innerHTML = html;
+                    document.querySelector("#workout-pre button").classList.remove("hidden");
+                },
+                start: function() {
+                    this.active = true;
+                    document.getElementById("workout-pre").classList.add("hidden");
+                    document.getElementById("workout-active").classList.remove("hidden");
+                    document.getElementById("active-wo-name").innerText = this.template.name;
+                    this.renderExercises();
+                },
+                renderExercises: function() {
+                    const container = document.getElementById("exercise-container");
+                    container.innerHTML = "";
+                    this.template.exercises.forEach((ex, exIdx) => {
+                        let div = document.createElement("div");
+                        div.className = "card";
+                        let html = `<h4>${ex.name}</h4>
+                        <div class="set-row mt-1" style="font-size:0.8rem; color:var(--text-muted); font-weight:bold;">
+                            <div>Set</div><div>kg/lbs</div><div>Reps</div><div>Done</div>
+                        </div>`;
+                        
+                        ex.sets.forEach((set, setIdx) => {
+                            let isDone = set.done ? "done" : "";
+                            let checkIcon = set.done ? "✓" : "";
+                            html += `
+                            <div class="set-row">
+                                <div>${setIdx+1}</div>
+                                <div><input type="number" id="w_${exIdx}_${setIdx}" value="${set.weight}" onchange="App.Workout.updateSet(${exIdx},${setIdx},'weight',this.value)"></div>
+                                <div><input type="number" id="r_${exIdx}_${setIdx}" value="${set.reps}" onchange="App.Workout.updateSet(${exIdx},${setIdx},'reps',this.value)"></div>
+                                <div class="set-check ${isDone}" onclick="App.Workout.toggleSet(${exIdx},${setIdx})">${checkIcon}</div>
+                            </div>`;
+                        });
+                        div.innerHTML = html;
+                        container.appendChild(div);
+                    });
+                },
+                updateSet: function(eIdx, sIdx, prop, val) {
+                    this.template.exercises[eIdx].sets[sIdx][prop] = parseFloat(val) || 0;
+                },
+                toggleSet: function(eIdx, sIdx) {
+                    let s = this.template.exercises[eIdx].sets[sIdx];
+                    s.done = !s.done;
+                    this.renderExercises();
+                    if(s.done) App.Timer.start(90); // 90s auto rest
+                },
+                cancel: function() {
+                    if(confirm("Abort session? Progress won't be saved.")) {
+                        this.active = false;
+                        document.getElementById("workout-active").classList.add("hidden");
+                        document.getElementById("workout-pre").classList.remove("hidden");
+                    }
+                },
+                finish: async function() {
+                    let totalVolume = 0;
+                    let setsDone = 0;
+                    this.template.exercises.forEach(ex => {
+                        ex.sets.forEach(s => {
+                            if(s.done) {
+                                setsDone++;
+                                totalVolume += (s.weight * s.reps);
+                            }
+                        });
+                    });
+                    if(setsDone === 0) { App.Utils.toast("You didn't complete any sets!"); return; }
+                    
+                    const report = {
+                        id: App.state.today,
+                        name: this.template.name,
+                        volume: totalVolume,
+                        sets: setsDone,
+                        data: this.template
+                    };
+                    
+                    await App.DB.put("history", report);
+                    
+                    // Streak Logic
+                    if(App.state.user.lastWorkoutDate !== App.state.today) {
+                        let yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+                        if(App.state.user.lastWorkoutDate === yesterday.toISOString().split('T')[0]) {
+                            App.state.user.streak++;
+                        } else {
+                            App.state.user.streak = 1;
+                        }
+                        App.state.user.lastWorkoutDate = App.state.today;
+                    }
+                    
+                    await App.Utils.addXP(setsDone * 10);
+                    App.Utils.toast(`Workout Complete! Volume: ${totalVolume}kg`);
+                    
+                    this.active = false;
+                    document.getElementById("workout-active").classList.add("hidden");
+                    document.getElementById("workout-pre").classList.remove("hidden");
+                    this.renderPre();
+                }
+            },
+
+            // --- 8. TIMER ---
+            Timer: {
+                interval: null,
+                timeLeft: 0,
+                start: function(seconds) {
+                    this.timeLeft = seconds;
+                    document.getElementById("timer-overlay").style.display = "flex";
+                    this.updateDisplay();
+                    clearInterval(this.interval);
+                    this.interval = setInterval(() => {
+                        this.timeLeft--;
+                        this.updateDisplay();
+                        if(this.timeLeft <= 0) {
+                            this.stop();
+                            if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                        }
+                    }, 1000);
+                },
+                addTime: function(secs) { this.timeLeft += secs; this.updateDisplay(); },
+                stop: function() {
+                    clearInterval(this.interval);
+                    document.getElementById("timer-overlay").style.display = "none";
+                },
+                updateDisplay: function() {
+                    let m = Math.floor(this.timeLeft / 60).toString().padStart(2, '0');
+                    let s = (this.timeLeft % 60).toString().padStart(2, '0');
+                    document.getElementById("timer-time").innerText = `${m}:${s}`;
+                }
+            },
+
+            // --- 9. NUTRITION ---
+            Nutrition: {
+                searchTimer: null,
+                currentFood: null,
+                searchFood: async function() {
+                    clearTimeout(this.searchTimer);
+                    this.searchTimer = setTimeout(async () => {
+                        const q = document.getElementById("food-search").value.toLowerCase();
+                        if(q.length < 2) return;
+                        const foods = await App.DB.getAll("foods");
+                        const res = foods.filter(f => f.name.toLowerCase().includes(q));
+                        
+                        let html = '';
+                        res.forEach(f => {
+                            html += `<div class="exercise-list-item" onclick='App.Nutrition.selectFood(${JSON.stringify(f)})' style="cursor:pointer">
+                                <div><strong>${f.name}</strong><br><span class="text-muted">100g = ${f.cals} kcal</span></div>
+                            </div>`;
+                        });
+                        document.getElementById("food-search-results").innerHTML = html;
+                    }, 300);
+                },
+                selectFood: function(food) {
+                    this.currentFood = food;
+                    document.getElementById("fe-name").innerText = food.name;
+                    document.getElementById("food-entry-panel").classList.remove("hidden");
+                    document.getElementById("food-search-results").innerHTML = "";
+                    document.getElementById("food-search").value = "";
+                    this.updateFoodEntry();
+                },
+                updateFoodEntry: function() {
+                    if(!this.currentFood) return;
+                    let qty = parseFloat(document.getElementById("fe-qty").value) || 0;
+                    let mult = qty / 100;
+                    document.getElementById("fe-macros").innerText = 
+                        `${Math.round(this.currentFood.cals * mult)} kcal | P: ${(this.currentFood.pro * mult).toFixed(1)}g | C: ${(this.currentFood.carb * mult).toFixed(1)}g | F: ${(this.currentFood.fat * mult).toFixed(1)}g`;
+                },
+                logFood: async function() {
+                    let qty = parseFloat(document.getElementById("fe-qty").value);
+                    if(!qty || qty <= 0) return;
+                    let mult = qty / 100;
+                    
+                    let meal = await App.DB.get("meals", App.state.today);
+                    if(!meal) meal = { id: App.state.today, cals:0, pro:0, carb:0, fat:0, logs:[] };
+                    
+                    let entry = {
+                        id: App.Utils.uuid(),
+                        food: this.currentFood.name,
+                        mealType: document.getElementById("fe-meal").value,
+                        qty: qty,
+                        cals: this.currentFood.cals * mult,
+                        pro: this.currentFood.pro * mult,
+                        carb: this.currentFood.carb * mult,
+                        fat: this.currentFood.fat * mult,
+                    };
+                    
+                    meal.logs.push(entry);
+                    meal.cals += entry.cals; meal.pro += entry.pro; meal.carb += entry.carb; meal.fat += entry.fat;
+                    
+                    await App.DB.put("meals", meal);
+                    App.Utils.toast("Food Logged!");
+                    
+                    document.getElementById("food-entry-panel").classList.add("hidden");
+                    this.renderLog();
+                    App.Utils.addXP(5); // Small reward for logging food
+                },
+                renderLog: async function() {
+                    let meal = await App.DB.get("meals", App.state.today);
+                    let container = document.getElementById("nutrition-log");
+                    if(!meal || meal.logs.length === 0) {
+                        container.innerHTML = "<p class='text-muted text-center'>No food logged today.</p>";
+                        return;
+                    }
+                    
+                    let html = '';
+                    meal.logs.forEach(l => {
+                        html += `<div class="exercise-list-item">
+                            <div><strong>${l.food}</strong> (${l.qty}g)<br><span class="text-muted">${l.mealType}</span></div>
+                            <div class="text-right"><strong>${Math.round(l.cals)} kcal</strong><br><span class="text-muted" style="font-size:0.75rem">P:${Math.round(l.pro)} C:${Math.round(l.carb)} F:${Math.round(l.fat)}</span></div>
+                        </div>`;
+                    });
+                    container.innerHTML = html;
+                }
+            },
+
+            // --- 10. DAILY CHECK-IN ---
+            CheckIn: {
+                submit: async function(e) {
+                    e.preventDefault();
+                    let weight = parseFloat(document.getElementById("ci-weight").value);
+                    let sleep = parseFloat(document.getElementById("ci-sleep").value);
+                    let energy = parseInt(document.getElementById("ci-energy").value);
+                    let soreness = parseInt(document.getElementById("ci-soreness").value);
+                    
+                    // Simple logic for recovery score (Max 100)
+                    // Sleep target 8. Energy target 10. Soreness target 1 (inverted).
+                    let sleepScore = Math.min(100, (sleep / 8) * 100);
+                    let energyScore = (energy / 10) * 100;
+                    let sorenessScore = ((11 - soreness) / 10) * 100; 
+                    
+                    let score = Math.round((sleepScore * 0.4) + (energyScore * 0.4) + (sorenessScore * 0.2));
+                    
+                    await App.DB.put("checkins", { date: App.state.today, weight, sleep, energy, soreness, score });
+                    await App.DB.put("weightLog", { date: App.state.today, weight }); // Sync weight
+                    
+                    App.state.user.weight = weight;
+                    await App.DB.put("user", App.state.user);
+                    
+                    App.Utils.toast(`Check-in Complete. Recovery: ${score}%`);
+                    App.Utils.addXP(20);
+                    App.Navigation.go("dashboard");
+                }
+            },
+
+            // --- 11. PROGRESS & ANALYTICS ---
+            Progress: {
+                render: async function() {
+                    const wl = await App.DB.getAll("weightLog");
+                    if(wl.length > 0) {
+                        wl.sort((a,b) => new Date(a.date) - new Date(b.date));
+                        document.getElementById("prog-start-wt").innerText = wl[0].weight;
+                        document.getElementById("prog-curr-wt").innerText = wl[wl.length-1].weight;
+                        this.drawChart(wl);
+                    }
+                    
+                    const hist = await App.DB.getAll("history");
+                    document.getElementById("stat-workouts").innerText = hist.length;
+                    let vol = 0;
+                    hist.forEach(h => vol += h.volume);
+                    document.getElementById("stat-volume").innerText = vol + " kg";
+                    document.getElementById("stat-level").innerText = App.state.user.level;
+                },
+                drawChart: function(data) {
+                    const container = document.getElementById("chart-weight");
+                    container.innerHTML = "";
+                    if(data.length < 2) {
+                        container.innerHTML = "<p class='text-muted text-center' style='margin-top:80px;'>Need more data for chart.</p>";
+                        return;
+                    }
+                    
+                    const w = container.clientWidth;
+                    const h = 200;
+                    const minW = Math.min(...data.map(d=>d.weight)) - 2;
+                    const maxW = Math.max(...data.map(d=>d.weight)) + 2;
+                    const range = maxW - minW;
+                    
+                    let pts = data.map((d, i) => {
+                        let x = (i / (data.length - 1)) * w;
+                        let y = h - (((d.weight - minW) / range) * h);
+                        return `${x},${y}`;
+                    }).join(" ");
+                    
+                    let svg = `<svg width="100%" height="100%" viewBox="0 0 ${w} ${h}">
+                        <polyline fill="none" stroke="var(--primary)" stroke-width="3" points="${pts}" />
+                        ${data.map((d,i) => {
+                            let x = (i / (data.length - 1)) * w;
+                            let y = h - (((d.weight - minW) / range) * h);
+                            return `<circle cx="${x}" cy="${y}" r="4" fill="var(--primary)" />`;
+                        }).join("")}
+                    </svg>`;
+                    container.innerHTML = svg;
+                }
+            },
+
+            // --- 12. DATA MANAGEMENT ---
+            Data: {
+                export: async function() {
+                    const data = {
+                        user: await App.DB.getAll("user"),
+                        history: await App.DB.getAll("history"),
+                        meals: await App.DB.getAll("meals"),
+                        checkins: await App.DB.getAll("checkins"),
+                        weightLog: await App.DB.getAll("weightLog")
+                    };
+                    const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `ForgeOS_Backup_${App.state.today}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                },
+                reset: async function() {
+                    if(confirm("DANGER! This will delete ALL local data. Proceed?")) {
+                        await App.DB.clear("user");
+                        await App.DB.clear("history");
+                        await App.DB.clear("meals");
+                        await App.DB.clear("checkins");
+                        await App.DB.clear("weightLog");
+                        location.reload();
+                    }
+                }
+            }
+        };
+
+        // --- INIT LISTENER ---
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                await App.DB.init();
+                await App.Seed.run();
+                
+                const userRecs = await App.DB.getAll("user");
+                if (userRecs.length > 0) {
+                    App.state.user = userRecs[0];
+                    document.getElementById("main-nav").style.display = "flex";
+                    App.Navigation.go('dashboard');
+                } else {
+                    App.Navigation.go('onboarding');
+                }
+                
+                // Form Bindings
+                document.getElementById("onboarding-form").addEventListener("submit", App.Onboarding.submit);
+                document.getElementById("checkin-form").addEventListener("submit", App.CheckIn.submit);
+                
+                // Resize listener for chart
+                window.addEventListener("resize", () => {
+                    if(document.getElementById("page-progress").classList.contains("active")) App.Progress.render();
+                });
+                
+            } catch (err) {
+                console.error("Initialization Failed:", err);
+                
+                // Display the sophisticated error panel instead of just crashing
+                document.body.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; padding: 2rem; text-align: center; background: #0d0d0d; color: white;">
+                        <h2 style="color: #ff471a; margin-bottom: 1rem;">Storage Access Denied</h2>
+                        <p style="color: #a0a0a0; max-width: 400px; margin-bottom: 1.5rem; line-height: 1.6;">
+                            <strong>Error Context:</strong><br> ${err.message || err}
+                        </p>
+                        <div style="background: #1a1a1a; padding: 1.5rem; border-radius: 8px; border: 1px solid #333; text-align: left; max-width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                            <h4 style="margin-bottom: 1rem; color: #ff471a;">How to fix this issue:</h4>
+                            <ol style="margin-left: 1.5rem; color: #ccc; line-height: 1.8;">
+                                <li>Do not use <strong>Incognito or Private Browsing</strong> mode (they strictly block local databases).</li>
+                                <li>If you double-clicked the file (using the <code style="color:#ffc107">file:///</code> protocol), try using <strong>Google Chrome or Firefox</strong>. Safari and Brave often block databases for local files.</li>
+                                <li><strong>Best Solution:</strong> Run the file through a local web server (e.g., VS Code's "Live Server" extension, or typing <code>python -m http.server</code> in your terminal).</li>
+                            </ol>
+                        </div>
+                    </div>`;
+            }
+        });
+
+    </script>
+</body>
+</html>
